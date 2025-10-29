@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>智感未来 · 炫动科技宣传页</title>
+  <meta name="description" content="高动效、广告风格的科技宣传单页，含粒子背景、滚动动效、跑马灯、悬浮广告、计数器、时间轴等。"/>
+  <style>
+    :root{
+      --bg-1:#0b132b;/*夜空蓝*/
+      --bg-2:#1c2541;/*深蓝*/
+      --ac-1:#5ef1ff;/*青蓝霓虹*/
+      --ac-2:#8a5cff;/*紫霓虹*/
+      --txt-1:#e6f1ff;/*主文字*/
+      --txt-2:#a9b8d4;/*次文字*/
+      --card:#0f1b37cc;/*卡片背景(含透明)*/
+      --glass:#ffffff14;/*玻璃态*/
+      --glow:#85f3ff80;
+      --radius:20px;
+      --shadow:0 10px 30px rgba(0,0,0,.35);
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0; color:var(--txt-1); font:16px/1.6 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,"Noto Sans SC","PingFang SC","Hiragino Sans GB",sans-serif;
+      background: radial-gradient(1200px 800px at 10% 10%, #111933 0%, #0b1229 35%, #070d20 100%);
+      overflow-x:hidden;
+    }
+    /* 动态渐变光晕 */
+    .bg-gradient{
+      position:fixed; inset:-20vmax; z-index:-2; filter: blur(80px) saturate(120%);
+      background: 
+        radial-gradient(35vmax 35vmax at 20% 20%, #1b3bff22 0, transparent 60%),
+        radial-gradient(35vmax 35vmax at 80% 30%, #00ffd522 0, transparent 60%),
+        radial-gradient(35vmax 35vmax at 50% 80%, #b000ff22 0, transparent 60%);
+      animation: hue 14s linear infinite;
+    }
+    @keyframes hue{to{filter:hue-rotate(360deg) blur(80px) saturate(120%);}}
+
+    /* 粒子画布在最底层 */
+    #bg-canvas{position:fixed; inset:0; z-index:-3; background:transparent}
+
+    header{
+      position:sticky; top:0; z-index:50; backdrop-filter:saturate(120%) blur(10px);
+      background:linear-gradient(180deg, #0c1427d9 0, #0c142700 100%);
+      border-bottom:1px solid #ffffff10;
+    }
+    .nav{max-width:1200px; margin:auto; display:flex; align-items:center; gap:18px; padding:14px 18px}
+    .logo{display:flex; align-items:center; gap:10px; font-weight:700; letter-spacing:.5px}
+    .logo-badge{width:34px;height:34px;border-radius:10px; background:linear-gradient(135deg,var(--ac-1),var(--ac-2)); box-shadow:0 0 20px var(--glow) inset, 0 0 30px #0008}
+    .nav a{color:var(--txt-2); text-decoration:none; padding:8px 12px; border-radius:12px}
+    .nav a:hover{color:var(--txt-1); background:#ffffff10}
+    .nav .cta{margin-left:auto}
+    .btn{position:relative; display:inline-flex; align-items:center; gap:8px; padding:12px 18px; border-radius:14px; border:1px solid #5ef1ff55; background:linear-gradient(180deg,#142443,#0e1a33); color:#cfe8ff; text-decoration:none; box-shadow:0 10px 25px #0006, inset 0 0 0 1px #ffffff09; overflow:hidden}
+    .btn:hover{transform:translateY(-1px)}
+    .btn::after{content:""; position:absolute; inset:0; background:linear-gradient(120deg, transparent 0, #ffffff55 30%, transparent 60%); transform:translateX(-120%);}
+    .btn:hover::after{animation:sheen .9s ease}
+    @keyframes sheen{to{transform:translateX(120%);}}
+
+    /* 顶部信息条（跑马灯） */
+    .notice{border-block:1px solid #ffffff12; background:#0a1530cc}
+    .marquee{max-width:1200px; margin:auto; white-space:nowrap; overflow:hidden; padding:8px 0; mask-image:linear-gradient(90deg, transparent 0, #000 8%, #000 92%, transparent 100%)}
+    .marquee span{display:inline-block; padding:0 28px; color:#a8fffe; text-shadow:0 0 8px #64f9ff70; letter-spacing:.4px; animation:marquee 18s linear infinite}
+    @keyframes marquee{from{transform:translateX(0)} to{transform:translateX(-50%);}}
+
+    /* 主视觉 */
+    .hero{position:relative; max-width:1200px; margin:24px auto 0; padding:72px 18px 36px; display:grid; grid-template-columns:1.15fr .85fr; gap:32px; align-items:center}
+    .tag{display:inline-flex; align-items:center; gap:8px; padding:8px 12px; border:1px solid #ffffff1a; border-radius:999px; background:#0a163199; color:#9adfff; box-shadow:0 0 30px #0006}
+    .tag i{width:8px;height:8px;border-radius:50%; background:radial-gradient(var(--ac-1),#fff)}
+    .glitch{position:relative; font-size:56px; line-height:1.05; font-weight:900; letter-spacing:.8px; margin:14px 0 6px}
+    .glitch span{position:relative; display:block; background:linear-gradient(90deg,var(--ac-1),var(--ac-2)); -webkit-background-clip:text; background-clip:text; color:transparent; filter:drop-shadow(0 6px 20px #000)}
+    .glitch::before,.glitch::after{content:attr(data-text); position:absolute; left:0; top:0; width:100%; color:#62eaff; mix-blend-mode:screen; clip-path:inset(0 0 0 0); opacity:.75}
+    .glitch::before{transform:translate(2px,0); text-shadow:-2px 0 #62eaff}
+    .glitch::after{transform:translate(-2px,0); text-shadow:2px 0 #a46bff}
+    .hero p{color:var(--txt-2); margin:10px 0 22px}
+    .actions{display:flex; gap:14px; flex-wrap:wrap}
+    .btn.primary{border-color:#8a5cff66; background:linear-gradient(180deg,#261f55,#1a1445); color:#eae4ff; box-shadow:0 15px 30px #0008, 0 0 30px #7a4fff33 inset}
+    .meta{display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-top:22px}
+    .meta .pill{padding:10px 12px; border-radius:14px; background:#0a163199; border:1px solid #ffffff12; color:#b6c9ff; text-align:center}
+
+    .hero-visual{position:relative; aspect-ratio:4/3; border-radius:24px; overflow:hidden; background: radial-gradient(120% 120% at 20% 20%, #0e1a33 0, #0a1428 60%); box-shadow:var(--shadow), inset 0 0 0 1px #ffffff0f}
+    .hero-visual .orb{position:absolute; width:260px; height:260px; border-radius:50%; filter:blur(1px) saturate(120%); background:conic-gradient(from 0deg, var(--ac-1), var(--ac-2), var(--ac-1)); top:14%; left:14%; animation:spin 12s linear infinite}
+    .hero-visual .ring{position:absolute; inset:14%; border-radius:50%; border:2px dashed #8a5cff55; animation:spin 16s linear infinite reverse}
+    .hero-visual .grid{position:absolute; inset:0; background-image:linear-gradient(#ffffff0e 1px, transparent 1px), linear-gradient(90deg, #ffffff0e 1px, transparent 1px); background-size:40px 40px; transform:perspective(800px) rotateX(50deg) translateY(20%); opacity:.3}
+    @keyframes spin{to{transform:rotate(360deg)}}
+
+    /* 悬浮广告角标 */
+    .ribbon{position:absolute; right:-70px; top:18px; transform:rotate(35deg); background:linear-gradient(90deg,#ff9a3c,#ffd26f); color:#1b1200; padding:8px 110px; font-weight:800; letter-spacing:.5px; box-shadow:0 8px 20px #0006}
+
+    /* 品牌logo滚动条 */
+    .logos{margin:8px 0 30px; padding:14px 0; border-block:1px solid #ffffff12; background:#0b152f}
+    .logo-track{display:flex; gap:40px; width:max-content; animation:logo-marquee 24s linear infinite}
+    .logo-wrap{opacity:.7; filter:grayscale(1); transition:opacity .2s}
+    .logo-wrap:hover{opacity:1; filter:none}
+    @keyframes logo-marquee{from{transform:translateX(0)} to{transform:translateX(-50%);}}
+
+    /* 功能卡片 */
+    .section{max-width:1200px; margin:30px auto; padding:12px 18px}
+    .section h2{font-size:32px; margin:8px 0 12px; letter-spacing:.5px}
+    .muted{color:var(--txt-2)}
+    .grid{display:grid; gap:16px}
+    .grid.g3{grid-template-columns:repeat(3,1fr)}
+    .grid.g4{grid-template-columns:repeat(4,1fr)}
+    .card{position:relative; padding:20px; border-radius:var(--radius); background:linear-gradient(180deg,#0a1429,#091127); border:1px solid #ffffff10; box-shadow:var(--shadow); overflow:hidden}
+    .card::before{content:""; position:absolute; inset:-1px; border-radius:inherit; padding:1px; background:linear-gradient(135deg, #ffffff05, #ffffff01); -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude}
+    .card:hover{transform:translateY(-4px); box-shadow:0 18px 40px #0008}
+    .card .icon{width:46px; height:46px; border-radius:12px; display:grid; place-items:center; background:linear-gradient(135deg,#173263,#0e1f45); border:1px solid #5ef1ff40; box-shadow:inset 0 0 30px #5ef1ff10}
+    .card h3{margin:12px 0 6px}
+
+    /* 视差展示区 */
+    .split{display:grid; grid-template-columns:1fr 1fr; gap:18px; align-items:center}
+    .parallax{position:relative; height:420px; border-radius:22px; overflow:hidden; background:linear-gradient(180deg,#0b132b,#0a1327)}
+    .layer{position:absolute; inset:0; background-size:cover; background-position:center; transform:translateZ(0)}
+    .layer.one{background-image:radial-gradient(#8a5cff33 0, transparent 50%)}
+    .layer.two{background-image:radial-gradient(#5ef1ff22 0, transparent 60%)}
+    .layer.grid{background-image:linear-gradient(#ffffff10 1px, transparent 1px), linear-gradient(90deg,#ffffff10 1px, transparent 1px); background-size:60px 60px; mix-blend-mode:overlay; opacity:.2}
+    .phone{position:absolute; inset:auto 18px 18px auto; width:220px; height:420px; border-radius:26px; background:linear-gradient(180deg,#0f1933,#0b142a); border:1px solid #ffffff14; box-shadow:0 18px 50px #000; overflow:hidden}
+    .phone .screen{position:absolute; inset:14px; border-radius:18px; background:linear-gradient(180deg,#182a52,#0c1732); border:1px solid #ffffff10}
+    .bullet{display:flex; gap:10px; align-items:flex-start; margin:10px 0}
+    .bullet i{width:9px;height:9px;border-radius:50%; background:radial-gradient(var(--ac-2),#fff)}
+
+    /* 计数器 */
+    .stats{display:grid; grid-template-columns:repeat(4,1fr); gap:18px}
+    .stat{padding:18px; border-radius:18px; background:#0a1530; border:1px solid #ffffff14; text-align:center}
+    .stat .num{font-size:34px; font-weight:900; letter-spacing:.5px; text-shadow:0 0 18px #65f3ff44, 0 0 32px #8a5cff22}
+
+    /* 时间轴 */
+    .timeline{position:relative; margin:16px 0}
+    .timeline::before{content:""; position:absolute; left:16px; top:0; bottom:0; width:2px; background:linear-gradient(var(--ac-2),var(--ac-1))}
+    .step{position:relative; margin-left:54px; margin-bottom:16px; padding:14px 16px; border:1px solid #ffffff12; background:#0a1430; border-radius:14px; box-shadow:var(--shadow)}
+    .step::before{content:""; position:absolute; left:-42px; top:16px; width:14px; height:14px; border-radius:50%; background:radial-gradient(#fff,#8a5cff); box-shadow:0 0 16px #8a5cff55}
+
+    /* 客户/徽标走马灯 */
+    .carousel{position:relative; overflow:hidden; border-radius:18px; border:1px solid #ffffff12; background:#0a1430}
+    .carousel .track{display:flex; gap:16px; width:max-content; animation:carousel 22s linear infinite}
+    .carousel .item{min-width:280px; padding:16px; background:#0b1733; border:1px solid #ffffff10; border-radius:14px}
+    @keyframes carousel{from{transform:translateX(0)} to{transform:translateX(-50%);}}
+
+    /* CTA */
+    .cta-box{position:relative; padding:28px; border-radius:24px; background:radial-gradient(120% 120% at 10% 10%, #171c39 0, #0c142c 60%); border:1px solid #ffffff14; box-shadow:0 18px 50px #000}
+    .cta-box .waves{position:absolute; inset:-2px; border-radius:inherit; background:conic-gradient(from 0deg, #5ef1ff00, #5ef1ff22, #8a5cff00 50%, #8a5cff22, #5ef1ff00); filter: blur(12px); opacity:.45; animation:spin 16s linear infinite}
+
+    /* 悬浮广告泡泡 */
+    .float-ads{position:fixed; inset:auto 14px 14px auto; display:flex; flex-direction:column; gap:10px; z-index:40}
+    .bubble{padding:10px 12px; border-radius:14px; background:#08122aee; border:1px solid #ffffff14; box-shadow:0 8px 20px #0008; animation:floatY 5s ease-in-out infinite}
+    .bubble b{background:linear-gradient(90deg,#f9d423,#ff4e50); -webkit-background-clip:text; background-clip:text; color:transparent}
+    @keyframes floatY{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+
+    /* 进入可视区域时的显隐 */
+    .reveal{opacity:0; transform:translateY(16px); transition:opacity .6s ease, transform .6s ease}
+    .reveal.in-view{opacity:1; transform:none}
+
+    /* 响应式 */
+    @media (max-width:1024px){
+      .hero{grid-template-columns:1fr;}
+      .meta{grid-template-columns:repeat(2,1fr)}
+      .split{grid-template-columns:1fr}
+      .stats{grid-template-columns:repeat(2,1fr)}
+      .grid.g3{grid-template-columns:1fr 1fr}
+      .grid.g4{grid-template-columns:1fr 1fr}
+    }
+    @media (max-width:640px){
+      .glitch{font-size:36px}
+      .hero{padding-top:48px}
+      .meta{grid-template-columns:1fr}
+      .stats{grid-template-columns:1fr}
+      .grid.g3,.grid.g4{grid-template-columns:1fr}
+    }
+  </style>
+</head>
+<body>
+  <canvas id="bg-canvas" aria-hidden="true"></canvas>
+  <div class="bg-gradient" aria-hidden="true"></div>
+
+  <header>
+    <nav class="nav">
+      <div class="logo">
+        <div class="logo-badge"></div>
+        <div>智感未来 TechVision</div>
+      </div>
+      <a href="#features">产品亮点</a>
+      <a href="#cases">应用案例</a>
+      <a href="#roadmap">研发进度</a>
+      <a href="#contact" class="cta btn">立即咨询 →</a>
+    </nav>
+  </header>
+
+  <div class="notice">
+    <div class="marquee" aria-label="动态资讯跑马灯">
+      <span>· AI 驱动 · 裸眼 3D · 光栅光场 · XR 显示 · 低功耗神经算力 · 零代码集成 · 边缘渲染 · 端云联动 · 安全可信 · </span>
+      <span>· AI 驱动 · 裸眼 3D · 光栅光场 · XR 显示 · 低功耗神经算力 · 零代码集成 · 边缘渲染 · 端云联动 · 安全可信 · </span>
+    </div>
+  </div>
+
+  <main>
+    <section class="hero section">
+      <div>
+        <div class="tag reveal"><i></i><span>次世代·科技体验引擎</span></div>
+        <h1 class="glitch" data-text="让科技，会说话"><span>让科技，会说话</span></h1>
+        <p class="muted reveal">一页打动客户：炫动广告风格 + 高级动效组件 + 性能友好。即插即用，5分钟发布你的<b>科技宣传页</b>。</p>
+        <div class="actions reveal">
+          <a class="btn primary" href="#contact">免费试用</a>
+          <a class="btn" href="#features">查看功能</a>
+        </div>
+        <div class="meta reveal">
+          <div class="pill">⚡ 60FPS 交互动画</div>
+          <div class="pill">🧠 AI 文案加持</div>
+          <div class="pill">🛠️ 零依赖·单文件</div>
+        </div>
+      </div>
+      <div class="hero-visual reveal" aria-hidden="true">
+        <div class="ribbon">限时上新</div>
+        <div class="orb"></div>
+        <div class="ring"></div>
+        <div class="grid"></div>
+      </div>
+    </section>
+
+    <!-- 品牌 logo 跑马灯（可替换为合作伙伴） -->
+    <section class="logos">
+      <div class="section" style="overflow:hidden">
+        <div class="logo-track" aria-label="品牌滚动">
+          <div class="logo-wrap"> <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='28'><text x='0' y='20' fill='%23a9b8d4' font-family='Arial' font-size='20'>NEURALINK</text></svg>" alt="logo"/></div>
+          <div class="logo-wrap"> <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='28'><text x='0' y='20' fill='%23a9b8d4' font-family='Arial' font-size='20'>QUANTUM</text></svg>" alt="logo"/></div>
+          <div class="logo-wrap"> <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='130' height='28'><text x='0' y='20' fill='%23a9b8d4' font-family='Arial' font-size='20'>VISIONLAB</text></svg>" alt="logo"/></div>
+          <div class="logo-wrap"> <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='110' height='28'><text x='0' y='20' fill='%23a9b8d4' font-family='Arial' font-size='20'>XR-WAVE</text></svg>" alt="logo"/></div>
+          <div class="logo-wrap"> <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='150' height='28'><text x='0' y='20' fill='%23a9b8d4' font-family='Arial' font-size='20'>AIGT ENGINE</text></svg>" alt="logo"/></div>
+          <!-- 复制一遍实现无缝滚动 -->
+          <div class="logo-wrap"> <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='28'><text x='0' y='20' fill='%23a9b8d4' font-family='Arial' font-size='20'>NEURALINK</text></svg>" alt="logo"/></div>
+          <div class="logo-wrap"> <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='28'><text x='0' y='20' fill='%23a9b8d4' font-family='Arial' font-size='20'>QUANTUM</text></svg>" alt="logo"/></div>
+          <div class="logo-wrap"> <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='130' height='28'><text x='0' y='20' fill='%23a9b8d4' font-family='Arial' font-size='20'>VISIONLAB</text></svg>" alt="logo"/></div>
+          <div class="logo-wrap"> <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='110' height='28'><text x='0' y='20' fill='%23a9b8d4' font-family='Arial' font-size='20'>XR-WAVE</text></svg>" alt="logo"/></div>
+          <div class="logo-wrap"> <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='150' height='28'><text x='0' y='20' fill='%23a9b8d4' font-family='Arial' font-size='20'>AIGT ENGINE</text></svg>" alt="logo"/></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="features" class="section">
+      <h2>硬核功能 · 一眼种草</h2>
+      <p class="muted">为前端宣传场景定制的动效组件，极具“广告感”。</p>
+      <div class="grid g3">
+        <article class="card reveal">
+          <div class="icon">🔮</div>
+          <h3>粒子星空背景</h3>
+          <p class="muted">GPU 友好、线条连线、跟随交互，瞬间提升科技氛围。</p>
+        </article>
+        <article class="card reveal">
+          <div class="icon">🎛️</div>
+          <h3>滚动触发与视差</h3>
+          <p class="muted">IntersectionObserver + 视差层，滑动即“开演”。</p>
+        </article>
+        <article class="card reveal">
+          <div class="icon">🏷️</div>
+          <h3>悬浮广告与角标</h3>
+          <p class="muted">折扣气泡、角标缎带、闪亮按钮，广告味拉满。</p>
+        </article>
+        <article class="card reveal">
+          <div class="icon">🧮</div>
+          <h3>动态计数器</h3>
+          <p class="muted">客户数/并发量/覆盖设备…自动增长，真实可信。</p>
+        </article>
+        <article class="card reveal">
+          <div class="icon">🛰️</div>
+          <h3>跑马灯与徽标墙</h3>
+          <p class="muted">无缝循环，细节抗锯齿，品牌背书一眼权威。</p>
+        </article>
+        <article class="card reveal">
+          <div class="icon">🛡️</div>
+          <h3>纯前端·零依赖</h3>
+          <p class="muted">单文件即可上线，支持任何静态托管平台。</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="split">
+        <div>
+          <h2>沉浸展示 · 视差控场</h2>
+          <p class="muted">通过多层视差与光晕网格，打造「产品出屏」的高级质感。右侧手机框只是占位，替换截图即用。</p>
+          <div class="bullet"><i></i><span>支持 <b>XR/裸眼3D/AI 算法</b> 等科技产品的炫酷演绎</span></div>
+          <div class="bullet"><i></i><span>滚动进入即显，交互成本极低</span></div>
+          <div class="bullet"><i></i><span>性能友好，不依赖第三方库</span></div>
+        </div>
+        <div class="parallax reveal" data-parallax>
+          <div class="layer one" data-speed="0.2"></div>
+          <div class="layer two" data-speed="-0.15"></div>
+          <div class="layer grid" data-speed="0.05"></div>
+          <div class="phone" data-speed="-0.08">
+            <div class="screen"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>实力认证 · 即看即信</h2>
+      <div class="stats">
+        <div class="stat reveal"><div class="num" data-count="68000">0</div><div class="muted">线上日曝光</div></div>
+        <div class="stat reveal"><div class="num" data-count="99.95">0</div><div class="muted">稳定性 SLA%</div></div>
+        <div class="stat reveal"><div class="num" data-count="120">0</div><div class="muted">覆盖行业场景</div></div>
+        <div class="stat reveal"><div class="num" data-count="5">0</div><div class="muted">分钟完成上线</div></div>
+      </div>
+    </section>
+
+    <section id="roadmap" class="section">
+      <h2>研发进度 · Roadmap</h2>
+      <div class="timeline">
+        <div class="step reveal"><b>Q1</b> · 发布单文件动画内核，支持粒子 + 跑马灯 + 计数器</div>
+        <div class="step reveal"><b>Q2</b> · 加入视差层、滚动触发与品牌墙组件</div>
+        <div class="step reveal"><b>Q3</b> · 拓展 XR/裸眼3D 展示模板与数据面板</div>
+        <div class="step reveal"><b>Q4</b> · 在线编辑器与主题市场（Beta）</div>
+      </div>
+    </section>
+
+    <section id="cases" class="section">
+      <h2>客户好评 · 实力背书</h2>
+      <div class="carousel reveal">
+        <div class="track">
+          <div class="item">“上线当天转化率提升 <b>42%</b>，移动端加载丝滑。” — 智能硬件品牌</div>
+          <div class="item">“纯前端零后端成本，活动页迭代速度翻倍。” — 互联网出海团队</div>
+          <div class="item">“XR 展示质感一流，投标演示直接压场。” — 科技方案商</div>
+          <div class="item">“单文件即可托管到 CDN，跨区域访问稳定。” — SaaS 平台</div>
+          <!-- 再复制一轮形成无缝循环 -->
+          <div class="item">“上线当天转化率提升 <b>42%</b>，移动端加载丝滑。” — 智能硬件品牌</div>
+          <div class="item">“纯前端零后端成本，活动页迭代速度翻倍。” — 互联网出海团队</div>
+          <div class="item">“XR 展示质感一流，投标演示直接压场。” — 科技方案商</div>
+          <div class="item">“单文件即可托管到 CDN，跨区域访问稳定。” — SaaS 平台</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="contact" class="section">
+      <div class="cta-box reveal">
+        <div class="waves" aria-hidden="true"></div>
+        <h2>现在，就用「广告味」讲好你的科技故事</h2>
+        <p class="muted">复制此文件 → 放入任意静态托管（如 GitHub Pages、Vercel、OSS/CDN）即可上线。需要换色/加品牌？告诉我。</p>
+        <div class="actions">
+          <a class="btn primary" href="#">获取定制方案</a>
+          <a class="btn" href="#">下载单页模版</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="section" style="border-top:1px solid #ffffff12; margin-top:30px">
+    <div style="display:flex; gap:12px; flex-wrap:wrap; align-items:center; justify-content:space-between">
+      <div class="logo" style="opacity:.8"><div class="logo-badge"></div><div>TechVision</div></div>
+      <div class="muted">© 2025 TechVision. All rights reserved.</div>
+    </div>
+  </footer>
+
+  <!-- 浮动广告泡泡 -->
+  <div class="float-ads" aria-live="polite">
+    <div class="bubble">🔥 <b>新品上新</b> · XR 展示页模板</div>
+    <div class="bubble" style="animation-delay:.8s">🎁 <b>限时福利</b> · 首单立减 30%</div>
+    <div class="bubble" style="animation-delay:1.6s">⚙️ <b>技术支持</b> · 7×12 在线</div>
+  </div>
+
+  <script>
+  // ========= 粒子背景 =========
+  (()=>{
+    const c = document.getElementById('bg-canvas');
+    const dpr = Math.min(window.devicePixelRatio||1, 2);
+    const ctx = c.getContext('2d');
+    let w=0,h=0, particles=[], MAX=110, mouse={x:-9999,y:-9999};
+
+    function resize(){ w= c.width = innerWidth*dpr; h = c.height = innerHeight*dpr; c.style.width=innerWidth+'px'; c.style.height=innerHeight+'px'; }
+    function rand(a,b){return a+Math.random()*(b-a)}
+
+    function init(){
+      particles = Array.from({length:MAX},()=>({
+        x:rand(0,w), y:rand(0,h), vx:rand(-.3,.3), vy:rand(-.3,.3), r:rand(1.2,2.2)
+      }));
+    }
+
+    function draw(){
+      ctx.clearRect(0,0,w,h);
+      // 星空底色微光
+      ctx.fillStyle = 'rgba(9,17,39,0.6)';
+      ctx.fillRect(0,0,w,h);
+      // 粒子
+      particles.forEach(p=>{
+        p.x += p.vx; p.y += p.vy;
+        if(p.x<0||p.x>w) p.vx*=-1; if(p.y<0||p.y>h) p.vy*=-1;
+        const dx = p.x-mouse.x, dy=p.y-mouse.y, dist=Math.hypot(dx,dy);
+        // 轻微避让鼠标
+        if(dist<160*dpr){ p.vx += dx/dist*0.02; p.vy += dy/dist*0.02; }
+        ctx.beginPath();
+        ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+        ctx.fillStyle = '#bfeaff55';
+        ctx.fill();
+      });
+      // 连线
+      for(let i=0;i<particles.length;i++){
+        for(let j=i+1;j<particles.length;j++){
+          const a=particles[i], b=particles[j];
+          const dx=a.x-b.x, dy=a.y-b.y, dist=dx*dx+dy*dy;
+          if(dist< (130*dpr)*(130*dpr)){
+            const alpha = 1 - Math.sqrt(dist)/(130*dpr);
+            ctx.strokeStyle = `rgba(120,200,255,${alpha*0.35})`;
+            ctx.lineWidth = 1*dpr;
+            ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke();
+          }
+        }
+      }
+      requestAnimationFrame(draw);
+    }
+
+    addEventListener('resize',()=>{resize()});
+    addEventListener('mousemove',e=>{mouse.x=e.clientX*dpr; mouse.y=e.clientY*dpr});
+    addEventListener('mouseleave',()=>{mouse.x=-9999; mouse.y=-9999});
+
+    resize(); init(); draw();
+  })();
+
+  // ========= 滚动显隐（reveal） =========
+  (()=>{
+    const io = new IntersectionObserver((entries)=>{
+      entries.forEach(e=>{ if(e.isIntersecting) e.target.classList.add('in-view') });
+    },{threshold:0.15});
+    document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+  })();
+
+  // ========= 计数器动画 =========
+  (()=>{
+    const nums = document.querySelectorAll('[data-count]');
+    const io = new IntersectionObserver((entries,obs)=>{
+      entries.forEach(e=>{
+        if(!e.isIntersecting) return;
+        const el = e.target; obs.unobserve(el);
+        const end = parseFloat(el.dataset.count); const isPercent = end%1!==0;
+        const dur = 1400; const t0 = performance.now();
+        function tick(t){
+          const p = Math.min(1,(t-t0)/dur); const v = end * (0.5 - Math.cos(p*Math.PI)/2);
+          el.textContent = isPercent ? v.toFixed(2) : Math.floor(v);
+          if(p<1) requestAnimationFrame(tick); else el.textContent = isPercent ? end.toFixed(2) : String(end);
+        }
+        requestAnimationFrame(tick);
+      })
+    },{threshold:0.5});
+    nums.forEach(n=>io.observe(n));
+  })();
+
+  // ========= 视差（基于 data-speed） =========
+  (()=>{
+    const items = [...document.querySelectorAll('[data-speed]')];
+    function onScroll(){
+      const y = window.scrollY || window.pageYOffset;
+      items.forEach(el=>{
+        const speed = parseFloat(el.dataset.speed)||0; 
+        el.style.transform = `translate3d(0, ${y*speed}px, 0)`;
+      })
+    }
+    addEventListener('scroll', onScroll, {passive:true});
+    onScroll();
+  })();
+
+  // ========= 轻量“下载”按钮假事件 =========
+  document.querySelectorAll('a[href="#"]').forEach(a=>{
+    a.addEventListener('click', e=>{ e.preventDefault(); alert('演示页面：请把整份 HTML 保存为文件后即可直接使用/托管。需要品牌色与 Logo 定制，随时告诉我。'); });
+  });
+  </script>
+</body>
+</html>
